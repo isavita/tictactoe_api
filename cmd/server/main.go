@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/isavita/tictactoe_api/internal/api"
 	"github.com/isavita/tictactoe_api/internal/game"
@@ -20,5 +21,11 @@ func main() {
 		http.NotFound(w, r)
 	})
 
-	http.ListenAndServe(":8080", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("default to port %s", port)
+	}
+
+	http.ListenAndServe(":"+port, nil)
 }
