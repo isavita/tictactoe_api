@@ -6,11 +6,12 @@ import (
 )
 
 const (
-	XPlayer        = 1
-	OPlayer        = 2
-	Draw           = 3
-	DifficultyEasy = 101
-	DifficultyHard = 102
+	XPlayer          = 1
+	OPlayer          = 2
+	Draw             = 3
+	DifficultyEasy   = 101
+	DifficultyMedium = 102
+	DifficultyHard   = 103
 )
 
 type GameState struct {
@@ -68,6 +69,8 @@ func GetOponent(player int) int {
 func (gs *GameState) MakeMove() int {
 	if gs.difficulty == DifficultyEasy {
 		return gs.findRandomMove()
+	} else if gs.difficulty == DifficultyMedium {
+		return gs.findMediumMove()
 	}
 	return gs.findBestMove()
 }
@@ -81,6 +84,23 @@ func (gs *GameState) findRandomMove() int {
 	}
 
 	return -1
+}
+
+func (gs *GameState) findMediumMove() int {
+	// Check if there's a move that prevents the opponent from winning
+	for i := 0; i < 9; i++ {
+		if gs.board[i] == 0 {
+			gs.board[i] = GetOponent(gs.player)
+			if gs.HasWinner() {
+				gs.board[i] = 0
+				return i
+			}
+			gs.board[i] = 0
+		}
+	}
+
+	// If there's no blocking move, make a random move
+	return gs.findRandomMove()
 }
 
 func (gs *GameState) findBestMove() int {

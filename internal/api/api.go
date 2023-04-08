@@ -19,6 +19,15 @@ func NewTicTacToeAPI(game *game.TicTacToeGame) *TicTacToeAPI {
 	}
 }
 
+const (
+	MISSING_PLAYER     = "Missing player value. Allowed values are 1 (X) or 2 (O)."
+	MISSING_BOARD      = "Missing board value. Must have exactly 9 numbers (0, 1, or 2); 0 (empty), 1 (Player 1), 2 (Player 2)."
+	INVALID_PLAYER     = "Invalid player value. Allowed values are 1 (X) or 2 (O)."
+	INVALID_DIFFICULTY = "Invalid difficulty: Use 1 (Easy), 2 (Medium), or 3 (Hard). Default is 3 (Hard) if not provided."
+	INVALID_TURN       = "It's not the submitted player's turn. Please submit the correct player's move."
+	INVALID_BOARD      = "Invalid board: Must have exactly 9 numbers (0, 1, or 2); 0 (empty), 1 (Player 1), 2 (Player 2); Player 1 moves >= Player 2 moves; max difference: 1."
+)
+
 func (api *TicTacToeAPI) TicTacToeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -32,26 +41,39 @@ func (api *TicTacToeAPI) TicTacToeHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if moveRequest.Player != 1 && moveRequest.Player != 2 {
-		http.Error(w, "Invalid player value", http.StatusBadRequest)
+	if moveRequest.Player == 0 {
+		http.Error(w, MISSING_PLAYER, http.StatusBadRequest)
+		return
+	}
+
+	if moveRequest.Board == [9]int{} && moveRequest.Player != game.OPlayer {
+		http.Error(w, MISSING_BOARD, http.StatusBadRequest)
+		return
+	}
+	if moveRequest.Player != game.XPlayer && moveRequest.Player != game.OPlayer {
+		http.Error(w, INVALID_PLAYER, http.StatusBadRequest)
 		return
 	}
 
 	currentPlayer, err := getCurrentPlayer(moveRequest.Board)
 	if err != nil {
-		http.Error(w, "Invalid board value", http.StatusBadRequest)
+		http.Error(w, INVALID_BOARD, http.StatusBadRequest)
 		return
 	}
 
 	if currentPlayer != moveRequest.Player {
-		http.Error(w, "It is not your turn", http.StatusBadRequest)
+		http.Error(w, INVALID_TURN, http.StatusBadRequest)
 		return
 	}
 
-	if moveRequest.Difficulty == 0 {
+	if moveRequest.Difficulty == 0 || moveRequest.Difficulty == 3 {
 		moveRequest.Difficulty = game.DifficultyHard
-	} else if moveRequest.Difficulty != game.DifficultyEasy && moveRequest.Difficulty != game.DifficultyHard {
-		http.Error(w, "Invalid difficulty value", http.StatusBadRequest)
+	} else if moveRequest.Difficulty == 1 {
+		moveRequest.Difficulty = game.DifficultyEasy
+	} else if moveRequest.Difficulty == 2 {
+		moveRequest.Difficulty = game.DifficultyMedium
+	} else {
+		http.Error(w, INVALID_DIFFICULTY, http.StatusBadRequest)
 		return
 	}
 

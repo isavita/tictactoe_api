@@ -105,16 +105,3 @@ func boardToDisplay(board [9]int) string {
 
 	return display.String()
 }
-
-// Convert the 1D board to a 3x3 board
-// O |   | X
-// ---------
-// X |   | X
-// ---------
-//   | O | O
-// board := [3][3]int{}
-// for i := 0; i < 3; i++ {
-// 	for j := 0; j < 3; j++ {
-// 		board[i][j] = g.gameState.board[i*3+j]
-// 	}
-// }
