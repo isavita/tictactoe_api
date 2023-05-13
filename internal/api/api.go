@@ -46,6 +46,15 @@ func (api *TicTacToeAPI) TicTacToeHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if moveRequest.Player == game.XPlayer {
+		moveRequest.Player = game.OPlayer
+	} else if moveRequest.Player == game.OPlayer {
+		moveRequest.Player = game.XPlayer
+	} else {
+		http.Error(w, INVALID_PLAYER, http.StatusBadRequest)
+		return
+	}
+
 	if moveRequest.Board == [9]int{} && moveRequest.Player != game.OPlayer {
 		http.Error(w, MISSING_BOARD, http.StatusBadRequest)
 		return
