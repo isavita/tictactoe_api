@@ -22,6 +22,10 @@ type GameState struct {
 }
 
 func (gs *GameState) Play(move int) bool {
+	if move < 0 || move >= 9 {
+		return false
+	}
+
 	if gs.board[move] == 0 {
 		gs.board[move] = gs.currentPlayer
 		return true
@@ -76,17 +80,33 @@ func (gs *GameState) MakeMove() int {
 }
 
 func (gs *GameState) findRandomMove() int {
-	for i := 0; i < 100; i++ {
-		n := rand.Intn(9)
-		if gs.board[n] == 0 {
-			return n
+	emptyCells := make([]int, 0)
+	for i := 0; i < 9; i++ {
+		if gs.board[i] == 0 {
+			emptyCells = append(emptyCells, i)
 		}
 	}
 
-	return -1
+	if len(emptyCells) == 0 {
+		return -1
+	}
+
+	return emptyCells[rand.Intn(len(emptyCells))]
 }
 
 func (gs *GameState) findMediumMove() int {
+	// Check if there's a move that wins the game
+	for i := 0; i < 9; i++ {
+		if gs.board[i] == 0 {
+			gs.board[i] = gs.player
+			if gs.HasWinner() {
+				gs.board[i] = 0
+				return i
+			}
+			gs.board[i] = 0
+		}
+	}
+
 	// Check if there's a move that prevents the opponent from winning
 	for i := 0; i < 9; i++ {
 		if gs.board[i] == 0 {
@@ -99,7 +119,7 @@ func (gs *GameState) findMediumMove() int {
 		}
 	}
 
-	// If there's no blocking move, make a random move
+	// If there's no winning or blocking move, make a random move
 	return gs.findRandomMove()
 }
 
@@ -110,7 +130,7 @@ func (gs *GameState) findBestMove() int {
 	for i := 0; i < 9; i++ {
 		if gs.board[i] == 0 {
 			gs.board[i] = gs.player
-			score := gs.minimax(0, false)
+			score := gs.minimax(0, false, math.Inf(-1), math.Inf(1))
 			gs.board[i] = 0
 			if score > bestScore {
 				bestScore = score
@@ -122,7 +142,7 @@ func (gs *GameState) findBestMove() int {
 	return bestMove
 }
 
-func (gs *GameState) minimax(depth int, isMaximizing bool) float64 {
+func (gs *GameState) minimax(depth int, isMaximizing bool, alpha, beta float64) float64 {
 	winner := gs.checkWinner()
 	if winner != 0 {
 		return gs.score(winner, depth)
@@ -133,9 +153,13 @@ func (gs *GameState) minimax(depth int, isMaximizing bool) float64 {
 		for i := 0; i < 9; i++ {
 			if gs.board[i] == 0 {
 				gs.board[i] = gs.player
-				eval := gs.minimax(depth+1, false)
+				eval := gs.minimax(depth+1, false, alpha, beta)
 				gs.board[i] = 0
 				maxEval = math.Max(maxEval, eval)
+				alpha = math.Max(alpha, eval)
+				if beta <= alpha {
+					break
+				}
 			}
 		}
 		return maxEval
@@ -144,9 +168,13 @@ func (gs *GameState) minimax(depth int, isMaximizing bool) float64 {
 		for i := 0; i < 9; i++ {
 			if gs.board[i] == 0 {
 				gs.board[i] = GetOponent(gs.player)
-				eval := gs.minimax(depth+1, true)
+				eval := gs.minimax(depth+1, true, alpha, beta)
 				gs.board[i] = 0
 				minEval = math.Min(minEval, eval)
+				beta = math.Min(beta, eval)
+				if beta <= alpha {
+					break
+				}
 			}
 		}
 		return minEval
