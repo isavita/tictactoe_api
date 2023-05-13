@@ -8,6 +8,7 @@ servers:
 paths:
   /tictactoe:
     post:
+      operationId: Play a move in the Tic Tac Toe game
       summary: Play a move in a Tic Tac Toe game
       requestBody:
         required: true
