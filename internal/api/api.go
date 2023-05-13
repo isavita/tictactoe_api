@@ -46,7 +46,9 @@ func (api *TicTacToeAPI) TicTacToeHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if moveRequest.Player == game.XPlayer {
+	if moveRequest.Board == [9]int{} {
+		// If the board is empty, this is a new game and we do not swap the player
+	} else if moveRequest.Player == game.XPlayer {
 		moveRequest.Player = game.OPlayer
 	} else if moveRequest.Player == game.OPlayer {
 		moveRequest.Player = game.XPlayer
@@ -55,7 +57,7 @@ func (api *TicTacToeAPI) TicTacToeHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if moveRequest.Board == [9]int{} && moveRequest.Player != game.OPlayer {
+	if moveRequest.Board == [9]int{} && moveRequest.Player != game.XPlayer {
 		http.Error(w, MISSING_BOARD, http.StatusBadRequest)
 		return
 	}
