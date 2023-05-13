@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Tic Tac Toe API
+  description: An API for playing Tic Tac Toe. The game board is represented as a single array, and the API allows users to submit their moves and receive the AI's response move.
+  version: 1.0.0
+servers:
+  - url: https://api.ludum.dev/v1
+paths:
+  /tictactoe:
+    post:
+      summary: Play a move in a Tic Tac Toe game
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                player:
+                  type: integer
+                  description: The player making the move (1 for X or 2 for O).
+                  example: 2
+                board:
+                  type: array
+                  items:
+                    type: integer
+                  description: The current state of the board as a single array with 9 elements.
+                  example: [0, 0, 0, 1, 0, 0, 0, 0, 0]
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: A boolean value indicating if the move was successful.
+                    example: true
+                  message:
+                    type: string
+                    description: A text description of the move made by the player.
+                    example: "Player 2 placed O in position 0."
+                  board:
+                    type: array
+                    items:
+                      type: integer
+                    description: The updated game board as an array.
+                    example: [2, 0, 0, 1, 0, 0, 0, 0, 0]
+                  boardDisplay:
+                    type: string
+                    description: The visual representation of the board as a string.
+                    example: " O |   |   \n --------- \n X |   |   \n --------- \n   |   |   "
+                  gameStatus:
+                    type: string
+                    description: The current game status. Possible values include: ongoing, player1_wins, player2_wins, draw.
+                    example: "ongoing"
+                  nextPlayer:
+                    type: integer
+                    description: The next player to make a move (1 for X or 2 for O).
+                    example: 1
