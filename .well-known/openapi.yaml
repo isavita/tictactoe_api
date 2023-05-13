@@ -54,9 +54,27 @@ paths:
                     example: " O |   |   \n --------- \n X |   |   \n --------- \n   |   |   "
                   gameStatus:
                     type: string
-                    description: The current game status. Possible values include: ongoing, player1_wins, player2_wins, draw.
-                    example: "ongoing"
+                    description: "The current game status. Possible values include: ongoing, player1_wins, player2_wins, draw."
+                    example: ongoing
                   nextPlayer:
                     type: integer
                     description: The next player to make a move (1 for X or 2 for O).
                     example: 1
+        '400':
+          description: Invalid request
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: A text with the error.
+                example: It's not the submitted player's turn. Please submit the correct player's move.
+        '404':
+          description: Page not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: A text with the error.
+                example: 404 page not found
+        default:
+          description: Unexpected error
