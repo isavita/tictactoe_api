@@ -95,7 +95,7 @@ func boardToDisplay(board [9]int) string {
 		case OPlayer:
 			display.WriteString(" O ")
 		default:
-			display.WriteString("   ")
+			display.WriteString(fmt.Sprintf(" %d ", i+1))
 		}
 
 		if i%3 != 2 {
