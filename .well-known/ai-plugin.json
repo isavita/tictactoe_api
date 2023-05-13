@@ -1,6 +1,6 @@
 {
     "schema_version": "v1",
-    "name_for_human": "Tic Tac Toe Plugin",
+    "name_for_human": "Tic Tac Toe",
     "name_for_model": "TicTacToe",
     "description_for_human": "Plugin for playing a game of Tic Tac Toe. You can submit your move and get the AI's response move.",
     "description_for_model": "This Tic Tac Toe API allows you to play a game of Tic Tac Toe against an AI. You interact with the API by sending your moves and receiving the AI's response move. The game board is represented as a single array, and both the input and output are JSON formatted. The API endpoint is `POST https://api.ludum.dev/v1/tictactoe`, and it provides the updated state of the game after each move.",
