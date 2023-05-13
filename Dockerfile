@@ -11,6 +11,7 @@ RUN GOOS=linux GOARCH=amd64 go build -o /tictactoe-api ./cmd/server/main.go
 FROM gcr.io/distroless/base-debian11
 WORKDIR /
 COPY --from=build /tictactoe-api /tictactoe-api
+COPY .well-known/ /.well-known/
 EXPOSE 8080
 USER nonroot:nonroot
 ENTRYPOINT ["/tictactoe-api"]

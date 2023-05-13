@@ -41,7 +41,7 @@ func main() {
 }
 
 func openAIPluginHandler(w http.ResponseWriter, r *http.Request) {
-	jsonFile, err := os.Open(".well-known/ai-plugin.json") // replace with the path to your ai-plugin.json file
+	jsonFile, err := os.Open("./.well-known/ai-plugin.json") // replace with the path to your ai-plugin.json file
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -59,7 +59,7 @@ func openAIPluginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoHandler(w http.ResponseWriter, r *http.Request) {
-	logoFile, err := os.Open(".well-known/logo.png")
+	logoFile, err := os.Open("./.well-known/logo.png")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -77,7 +77,7 @@ func logoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func openapiHandler(w http.ResponseWriter, r *http.Request) {
-	openapiFile, err := os.Open(".well-known/openapi.yaml")
+	openapiFile, err := os.Open("./.well-known/openapi.yaml")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
