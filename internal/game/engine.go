@@ -130,7 +130,7 @@ func (gs *GameState) findBestMove() int {
 	for i := 0; i < 9; i++ {
 		if gs.board[i] == 0 {
 			gs.board[i] = gs.player
-			score := gs.minimax(0, false, math.Inf(-1), math.Inf(1))
+			score := gs.minimax(0, true, math.Inf(-1), math.Inf(1))
 			gs.board[i] = 0
 			if score > bestScore {
 				bestScore = score
