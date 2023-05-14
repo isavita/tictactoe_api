@@ -21,20 +21,11 @@ func NewTicTacToeGame() *TicTacToeGame {
 	}
 }
 
-func (g *TicTacToeGame) MakeMove(moveRequest model.MoveRequest) model.MoveResponse {
-	// If restart is true, reset the game state and update the difficulty
-	if moveRequest.Restart {
-		g.gameState.board = [9]int{}
-		g.gameState.currentPlayer = XPlayer
-		g.gameState.player = OPlayer
-	} else {
-		g.gameState.board = moveRequest.Board
-		g.gameState.currentPlayer = moveRequest.Player
-		g.gameState.player = GetOponent(moveRequest.Player)
-	}
-
+func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveRequest) model.MoveResponse {
+	g.gameState.board = moveRequest.Board
+	g.gameState.currentPlayer = currentPlayer
+	g.gameState.player = GetOponent(currentPlayer)
 	g.gameState.difficulty = moveRequest.Difficulty
-	fmt.Println(g.gameState, moveRequest.Restart)
 
 	var message string = "Game Over."
 	// Make a move and update the game state
@@ -44,8 +35,8 @@ func (g *TicTacToeGame) MakeMove(moveRequest model.MoveRequest) model.MoveRespon
 	if aiMove != -1 {
 		success = g.gameState.Play(aiMove)
 		if success {
-			message = "Player " + strconv.Itoa(moveRequest.Player) + " placed "
-			if moveRequest.Player == XPlayer {
+			message = "Player " + strconv.Itoa(currentPlayer) + " placed "
+			if currentPlayer == XPlayer {
 				message += "X"
 			} else {
 				message += "O"
@@ -58,6 +49,7 @@ func (g *TicTacToeGame) MakeMove(moveRequest model.MoveRequest) model.MoveRespon
 
 	// Check for winner and game status
 	var gameStatus string
+	var nextPlayer int = -1
 	if g.gameState.HasWinner() {
 		gameStatus = model.GameStatusPlayer1Wins
 		if g.gameState.currentPlayer == OPlayer {
@@ -68,6 +60,7 @@ func (g *TicTacToeGame) MakeMove(moveRequest model.MoveRequest) model.MoveRespon
 	} else {
 		gameStatus = model.GameStatusOngoing
 		g.gameState.NextTurn()
+		nextPlayer = g.gameState.currentPlayer
 	}
 
 	// Create a response
@@ -77,7 +70,7 @@ func (g *TicTacToeGame) MakeMove(moveRequest model.MoveRequest) model.MoveRespon
 		Board:        g.gameState.board,
 		BoardDisplay: boardToDisplay(g.gameState.board),
 		GameStatus:   gameStatus,
-		NextPlayer:   g.gameState.currentPlayer,
+		NextPlayer:   nextPlayer,
 	}
 }
 

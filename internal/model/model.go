@@ -1,8 +1,6 @@
 package model
 
 type MoveRequest struct {
-	Player     int    `json:"player"`
-	Restart    bool   `json:"restart,omitempty"`
 	Board      [9]int `json:"board,omitempty"`
 	Difficulty int    `json:"difficulty,omitempty"`
 }
