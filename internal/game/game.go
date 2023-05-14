@@ -41,7 +41,7 @@ func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveReques
 			} else {
 				message += "O"
 			}
-			message += " in position " + strconv.Itoa(aiMove) + "."
+			message += " in position " + strconv.Itoa(aiMove+1) + "."
 		} else {
 			message = "Invalid move."
 		}
