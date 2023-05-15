@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -15,7 +16,8 @@ type TicTacToeGame struct {
 func NewTicTacToeGame() *TicTacToeGame {
 	return &TicTacToeGame{
 		gameState: &GameState{
-			board:         [9]int{},
+			board:         make([]int, 9),
+			boardSize:     3,
 			currentPlayer: XPlayer,
 		},
 	}
@@ -23,6 +25,7 @@ func NewTicTacToeGame() *TicTacToeGame {
 
 func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveRequest) model.MoveResponse {
 	g.gameState.board = moveRequest.Board
+	g.gameState.boardSize = moveRequest.BoardSize
 	g.gameState.currentPlayer = currentPlayer
 	g.gameState.player = GetOponent(currentPlayer)
 	g.gameState.difficulty = moveRequest.Difficulty
@@ -74,11 +77,13 @@ func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveReques
 	}
 }
 
-func boardToDisplay(board [9]int) string {
+func boardToDisplay(board []int) string {
 	var display strings.Builder
+	length := len(board)
+	side := int(math.Sqrt(float64(length)))
 
-	for i := 0; i < len(board); i++ {
-		if i > 0 && i%3 == 0 {
+	for i := 0; i < length; i++ {
+		if i > 0 && i%side == 0 {
 			display.WriteString("\n --------- \n")
 		}
 
@@ -91,7 +96,7 @@ func boardToDisplay(board [9]int) string {
 			display.WriteString(fmt.Sprintf(" %d ", i+1))
 		}
 
-		if i%3 != 2 {
+		if i%length != 2 {
 			display.WriteString("|")
 		}
 	}
