@@ -78,12 +78,19 @@ func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveReques
 }
 
 func boardToDisplay(board []int) string {
-	var display strings.Builder
-	length := len(board)
-	side := int(math.Sqrt(float64(length)))
+	size := int(math.Sqrt(float64(len(board))))
+	if size > 3 {
+		return boardToDisplayWhenBig(board, size)
+	} else {
+		return boardToDisplayWhenSmall(board, size)
+	}
+}
 
-	for i := 0; i < length; i++ {
-		if i > 0 && i%side == 0 {
+func boardToDisplayWhenSmall(board []int, size int) string {
+	var display strings.Builder
+
+	for i := 0; i < len(board); i++ {
+		if i > 0 && i%size == 0 {
 			display.WriteString("\n --------- \n")
 		}
 
@@ -96,7 +103,36 @@ func boardToDisplay(board []int) string {
 			display.WriteString(fmt.Sprintf(" %d ", i+1))
 		}
 
-		if i%length != 2 {
+		if i%size != 2 {
+			display.WriteString("|")
+		}
+	}
+
+	return display.String()
+}
+
+func boardToDisplayWhenBig(board []int, size int) string {
+	var display strings.Builder
+
+	for i := 0; i < len(board); i++ {
+		if i > 0 && i%size == 0 {
+			display.WriteString("\n")
+			for j := 0; j < size; j++ {
+				display.WriteString("-----")
+			}
+			display.WriteString("\n")
+		}
+
+		switch board[i] {
+		case XPlayer:
+			display.WriteString("  X ")
+		case OPlayer:
+			display.WriteString("  O ")
+		default:
+			display.WriteString(fmt.Sprintf(" %2d ", i+1))
+		}
+
+		if i%size != size-1 {
 			display.WriteString("|")
 		}
 	}

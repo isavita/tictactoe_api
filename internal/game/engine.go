@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 )
@@ -175,9 +174,7 @@ func (gs *GameState) findBestMove() int {
 	for i := 0; i < gs.boardSize*gs.boardSize; i++ {
 		if gs.board[i] == 0 {
 			gs.board[i] = gs.player
-			fmt.Println(gs)
 			score := gs.minimax(0, true, math.Inf(-1), math.Inf(1))
-			fmt.Println(gs)
 			gs.board[i] = 0
 
 			if score > bestScore {
