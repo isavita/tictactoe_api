@@ -42,7 +42,7 @@ Example of a valid response:
 ```json
 {
     "success": true,
-    "message": "Player 2 placed O in position 0.",
+    "message": "Player 2 placed O in position 1.",
     "board": [
         2,
         0,
