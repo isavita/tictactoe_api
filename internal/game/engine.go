@@ -13,7 +13,7 @@ const (
 	DifficultyEasy   = 101
 	DifficultyMedium = 102
 	DifficultyHard   = 103
-	MaxDepth         = 10 // change this to adjust the search depth
+	MaxDepth         = 6 // change this to adjust the search depth
 )
 
 type GameState struct {
@@ -191,8 +191,8 @@ func (gs *GameState) findBestMove() int {
 }
 
 func (gs *GameState) minimax(depth int, isMaximizing bool, alpha, beta float64) float64 {
-	if depth == MaxDepth {
-		return 0.0
+	if gs.boardSize > 3 && depth == MaxDepth {
+		return gs.heuristic()
 	}
 	winner := gs.checkWinner()
 	if winner != 0 {
@@ -315,4 +315,86 @@ func (gs *GameState) score(winner int, depth int) float64 {
 	default:
 		return 0
 	}
+}
+
+func (gs *GameState) heuristic() float64 {
+	aiPotentialWins := gs.countPotentialWins(gs.player)
+	opponentPotentialWins := gs.countPotentialWins(GetOponent(gs.player))
+
+	return float64(aiPotentialWins - opponentPotentialWins)
+}
+
+func (gs *GameState) countPotentialWins(player int) int {
+	count := 0
+	size := gs.boardSize
+
+	// Check rows
+	for i := 0; i < size; i++ {
+		potentialWin := true
+		emptyCount := 0
+		for j := 0; j < size; j++ {
+			if gs.board[i*size+j] == GetOponent(player) {
+				potentialWin = false
+				break
+			}
+			if gs.board[i*size+j] == 0 {
+				emptyCount++
+			}
+		}
+		if potentialWin && emptyCount == 1 {
+			count++
+		}
+	}
+
+	// Check columns
+	for i := 0; i < size; i++ {
+		potentialWin := true
+		emptyCount := 0
+		for j := 0; j < size; j++ {
+			if gs.board[i+j*size] == GetOponent(player) {
+				potentialWin = false
+				break
+			}
+			if gs.board[i+j*size] == 0 {
+				emptyCount++
+			}
+		}
+		if potentialWin && emptyCount == 1 {
+			count++
+		}
+	}
+
+	// Check main diagonal
+	potentialWin := true
+	emptyCount := 0
+	for i := 0; i < size; i++ {
+		if gs.board[i*size+i] == GetOponent(player) {
+			potentialWin = false
+			break
+		}
+		if gs.board[i*size+i] == 0 {
+			emptyCount++
+		}
+	}
+	if potentialWin && emptyCount == 1 {
+		count++
+	}
+
+	// Check secondary diagonal
+	potentialWin = true
+	emptyCount = 0
+	for i := 0; i < size; i++ {
+		if gs.board[i*size+(size-i-1)] == GetOponent(player) {
+			potentialWin = false
+			break
+		}
+		if gs.board[i*size+(size-i-1)] == 0 {
+			emptyCount++
+		}
+	}
+	if potentialWin && emptyCount == 1 {
+		count++
+	}
+
+	return count
 }

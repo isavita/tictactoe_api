@@ -51,3 +51,19 @@ func TestFindBestMove5By5Board(t *testing.T) {
 		t.Errorf("Expected move at index %d, but got %d", expectedMove, actualMove)
 	}
 }
+
+func TestFindBestMove6By6Board(t *testing.T) {
+	gs := GameState{
+		board:      []int{2, 2, 2, 2, 2, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		boardSize:  6,
+		player:     OPlayer,
+		difficulty: DifficultyHard,
+	}
+
+	expectedMove := 5
+	actualMove := gs.findBestMove()
+
+	if actualMove != expectedMove {
+		t.Errorf("Expected move at index %d, but got %d", expectedMove, actualMove)
+	}
+}
