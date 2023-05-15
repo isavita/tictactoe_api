@@ -71,6 +71,7 @@ func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveReques
 		Success:      success,
 		Message:      message,
 		Board:        g.gameState.board,
+		BoardSize:    g.gameState.boardSize,
 		BoardDisplay: boardToDisplay(g.gameState.board),
 		GameStatus:   gameStatus,
 		NextPlayer:   nextPlayer,

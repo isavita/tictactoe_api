@@ -40,12 +40,12 @@ func (api *TicTacToeAPI) TicTacToeHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// Sets default value to 3 for 3x3 board
-	if moveRequest.BoardSize <= 0 {
+	if moveRequest.BoardSize == 0 {
 		moveRequest.BoardSize = 3
 	}
 
 	// Check the board is not too big
-	if moveRequest.BoardSize > 6 {
+	if moveRequest.BoardSize > 6 || moveRequest.BoardSize < 3 {
 		http.Error(w, INVALID_BOARD_SIZE, http.StatusBadRequest)
 		return
 	}

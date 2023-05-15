@@ -10,6 +10,7 @@ type MoveResponse struct {
 	Success      bool   `json:"success"`
 	Message      string `json:"message"`
 	Board        []int  `json:"board"`
+	BoardSize    int    `json:"boardSize"`
 	BoardDisplay string `json:"boardDisplay"`
 	GameStatus   string `json:"gameStatus"`
 	NextPlayer   int    `json:"nextPlayer"`
