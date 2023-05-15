@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -15,7 +16,8 @@ type TicTacToeGame struct {
 func NewTicTacToeGame() *TicTacToeGame {
 	return &TicTacToeGame{
 		gameState: &GameState{
-			board:         [9]int{},
+			board:         make([]int, 9),
+			boardSize:     3,
 			currentPlayer: XPlayer,
 		},
 	}
@@ -23,6 +25,7 @@ func NewTicTacToeGame() *TicTacToeGame {
 
 func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveRequest) model.MoveResponse {
 	g.gameState.board = moveRequest.Board
+	g.gameState.boardSize = moveRequest.BoardSize
 	g.gameState.currentPlayer = currentPlayer
 	g.gameState.player = GetOponent(currentPlayer)
 	g.gameState.difficulty = moveRequest.Difficulty
@@ -68,17 +71,27 @@ func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveReques
 		Success:      success,
 		Message:      message,
 		Board:        g.gameState.board,
+		BoardSize:    g.gameState.boardSize,
 		BoardDisplay: boardToDisplay(g.gameState.board),
 		GameStatus:   gameStatus,
 		NextPlayer:   nextPlayer,
 	}
 }
 
-func boardToDisplay(board [9]int) string {
+func boardToDisplay(board []int) string {
+	size := int(math.Sqrt(float64(len(board))))
+	if size > 3 {
+		return boardToDisplayWhenBig(board, size)
+	} else {
+		return boardToDisplayWhenSmall(board, size)
+	}
+}
+
+func boardToDisplayWhenSmall(board []int, size int) string {
 	var display strings.Builder
 
 	for i := 0; i < len(board); i++ {
-		if i > 0 && i%3 == 0 {
+		if i > 0 && i%size == 0 {
 			display.WriteString("\n --------- \n")
 		}
 
@@ -91,7 +104,36 @@ func boardToDisplay(board [9]int) string {
 			display.WriteString(fmt.Sprintf(" %d ", i+1))
 		}
 
-		if i%3 != 2 {
+		if i%size != 2 {
+			display.WriteString("|")
+		}
+	}
+
+	return display.String()
+}
+
+func boardToDisplayWhenBig(board []int, size int) string {
+	var display strings.Builder
+
+	for i := 0; i < len(board); i++ {
+		if i > 0 && i%size == 0 {
+			display.WriteString("\n")
+			for j := 0; j < size; j++ {
+				display.WriteString("-----")
+			}
+			display.WriteString("\n")
+		}
+
+		switch board[i] {
+		case XPlayer:
+			display.WriteString("  X ")
+		case OPlayer:
+			display.WriteString("  O ")
+		default:
+			display.WriteString(fmt.Sprintf(" %2d ", i+1))
+		}
+
+		if i%size != size-1 {
 			display.WriteString("|")
 		}
 	}

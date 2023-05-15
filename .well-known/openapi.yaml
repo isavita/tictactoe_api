@@ -4,7 +4,7 @@ info:
   description: |
     An API for playing Tic Tac Toe. 
     The game board is represented as a single array, and the API allows users to submit the board with their move reflected in it, and receive the AI's response move reflected in the board.
-  version: 1.0.1
+  version: 1.1.0
 servers:
   - url: https://api.ludum.dev/v1
 paths:
@@ -25,15 +25,14 @@ paths:
                   items:
                     type: integer
                   description: |
-                    The current state of the board as a single array with 9 elements.
-                    When the AI starts the board is submited with 9 zeros or might be missing.
+                    The current state of the board as a single array. The array size depends on the size of the board (boardSize^2).
+                    When the AI starts the board is submited with zeros or might be missing.
                     When the player starts the board is submited with the player's first move.
                     When the player places an X or O in a position, the value of that position in the array is set to the player's number (1 for X or 2 for O).
                     For example, if the player places an X in the top left corner, the value of the first element in the array is set to 1.
-                    If the player places an O in the center, the value of the fifth element in the array is set to 2.
+                    If the player places an O in the center, the value of the element at the center of the array is set to 2.
                     You can use the boardDisplay property in the response to display the board visually.
-                    Keep note that the boardDisplay is numbered from 1 to 9, while the board array is numbered from 0 to 8.
-                  default: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    Keep note that the boardDisplay is numbered from 1 to n, where n is the total number of cells in the board, while the board array is numbered from 0 to n-1.
                   example: [0, 0, 0, 1, 0, 0, 0, 0, 0]
                 difficulty:
                   type: integer
@@ -42,6 +41,14 @@ paths:
                     Possible values are 1, 2, 3.
                     The higher the difficulty level, the smarter the AI.
                     The default difficulty level is 3.
+                  default: 3
+                  example: 3
+                boardSize:
+                  type: integer
+                  description: |
+                    The size of the board.
+                    Possible values are 3, 4, 5, 6.
+                    The default size is 3.
                   default: 3
                   example: 3
       responses:
@@ -66,6 +73,10 @@ paths:
                       type: integer
                     description: The updated game board as an array.
                     example: [2, 0, 0, 1, 0, 0, 0, 0, 0]
+                  boardSize:
+                    type: integer
+                    description: The size of the board.
+                    example: 3
                   boardDisplay:
                     type: string
                     description: The visual representation of the board as a string.

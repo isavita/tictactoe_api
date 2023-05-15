@@ -12,17 +12,19 @@ const (
 	DifficultyEasy   = 101
 	DifficultyMedium = 102
 	DifficultyHard   = 103
+	MaxDepth         = 6 // change this to adjust the search depth
 )
 
 type GameState struct {
-	board         [9]int
+	board         []int
+	boardSize     int
 	currentPlayer int
 	player        int
 	difficulty    int
 }
 
 func (gs *GameState) Play(move int) bool {
-	if move < 0 || move >= 9 {
+	if move < 0 || move >= gs.boardSize*gs.boardSize {
 		return false
 	}
 
@@ -39,17 +41,58 @@ func (gs *GameState) NextTurn() {
 }
 
 func (gs *GameState) HasWinner() bool {
-	// Check rows and columns
-	for i := 0; i < 3; i++ {
-		if (gs.board[i*3] != 0 && gs.board[i*3] == gs.board[i*3+1] && gs.board[i*3] == gs.board[i*3+2]) ||
-			(gs.board[i] != 0 && gs.board[i] == gs.board[i+3] && gs.board[i] == gs.board[i+6]) {
+	size := gs.boardSize
+	// Check rows
+	for i := 0; i < size; i++ {
+		win := true
+		for j := 1; j < size; j++ {
+			if gs.board[i*size] == 0 || gs.board[i*size] != gs.board[i*size+j] {
+				win = false
+				break
+			}
+		}
+		if win {
+			return true
+		}
+	}
+
+	// Check columns
+	for i := 0; i < size; i++ {
+		win := true
+		for j := 1; j < size; j++ {
+			if gs.board[i] == 0 || gs.board[i] != gs.board[i+j*size] {
+				win = false
+				break
+			}
+		}
+		if win {
 			return true
 		}
 	}
 
 	// Check diagonals
-	return (gs.board[0] != 0 && gs.board[0] == gs.board[4] && gs.board[0] == gs.board[8]) ||
-		(gs.board[2] != 0 && gs.board[2] == gs.board[4] && gs.board[2] == gs.board[6])
+	win := true
+	// Check main diagonal (top-left to bottom-right)
+	for i := 1; i < size; i++ {
+		if gs.board[0] == 0 || gs.board[0] != gs.board[i*size+i] {
+			win = false
+			break
+		}
+	}
+	if win {
+		return true
+	}
+
+	win = true
+	// Check secondary diagonal (top-right to bottom-left)
+	for i := 1; i < size; i++ {
+		if gs.board[size-1] == 0 || gs.board[size-1] != gs.board[i*size+(size-i-1)] {
+			win = false
+			break
+		}
+	}
+
+	return win
 }
 
 func (gs *GameState) IsDraw() bool {
@@ -81,7 +124,8 @@ func (gs *GameState) MakeMove() int {
 
 func (gs *GameState) findRandomMove() int {
 	emptyCells := make([]int, 0)
-	for i := 0; i < 9; i++ {
+	size := gs.boardSize * gs.boardSize
+	for i := 0; i < size; i++ {
 		if gs.board[i] == 0 {
 			emptyCells = append(emptyCells, i)
 		}
@@ -96,7 +140,7 @@ func (gs *GameState) findRandomMove() int {
 
 func (gs *GameState) findMediumMove() int {
 	// Check if there's a move that wins the game
-	for i := 0; i < 9; i++ {
+	for i := 0; i < gs.boardSize*gs.boardSize; i++ {
 		if gs.board[i] == 0 {
 			gs.board[i] = gs.player
 			if gs.HasWinner() {
@@ -108,7 +152,7 @@ func (gs *GameState) findMediumMove() int {
 	}
 
 	// Check if there's a move that prevents the opponent from winning
-	for i := 0; i < 9; i++ {
+	for i := 0; i < gs.boardSize*gs.boardSize; i++ {
 		if gs.board[i] == 0 {
 			gs.board[i] = GetOponent(gs.player)
 			if gs.HasWinner() {
@@ -127,11 +171,12 @@ func (gs *GameState) findBestMove() int {
 	bestScore := math.Inf(-1)
 	bestMove := -1
 
-	for i := 0; i < 9; i++ {
+	for i := 0; i < gs.boardSize*gs.boardSize; i++ {
 		if gs.board[i] == 0 {
 			gs.board[i] = gs.player
 			score := gs.minimax(0, true, math.Inf(-1), math.Inf(1))
 			gs.board[i] = 0
+
 			if score > bestScore {
 				bestScore = score
 				bestMove = i
@@ -143,6 +188,9 @@ func (gs *GameState) findBestMove() int {
 }
 
 func (gs *GameState) minimax(depth int, isMaximizing bool, alpha, beta float64) float64 {
+	if gs.boardSize > 3 && depth == MaxDepth {
+		return gs.heuristic()
+	}
 	winner := gs.checkWinner()
 	if winner != 0 {
 		return gs.score(winner, depth)
@@ -150,7 +198,7 @@ func (gs *GameState) minimax(depth int, isMaximizing bool, alpha, beta float64) 
 
 	if isMaximizing {
 		maxEval := math.Inf(-1)
-		for i := 0; i < 9; i++ {
+		for i := 0; i < gs.boardSize*gs.boardSize; i++ {
 			if gs.board[i] == 0 {
 				gs.board[i] = gs.player
 				eval := gs.minimax(depth+1, false, alpha, beta)
@@ -165,7 +213,8 @@ func (gs *GameState) minimax(depth int, isMaximizing bool, alpha, beta float64) 
 		return maxEval
 	} else {
 		minEval := math.Inf(1)
-		for i := 0; i < 9; i++ {
+
+		for i := 0; i < gs.boardSize*gs.boardSize; i++ {
 			if gs.board[i] == 0 {
 				gs.board[i] = GetOponent(gs.player)
 				eval := gs.minimax(depth+1, true, alpha, beta)
@@ -182,16 +231,59 @@ func (gs *GameState) minimax(depth int, isMaximizing bool, alpha, beta float64) 
 }
 
 func (gs *GameState) checkWinner() int {
-	winningPositions := [8][3]int{
-		{0, 1, 2}, {3, 4, 5}, {6, 7, 8},
-		{0, 3, 6}, {1, 4, 7}, {2, 5, 8},
-		{0, 4, 8}, {2, 4, 6},
+	size := gs.boardSize
+
+	// Check rows
+	for i := 0; i < size; i++ {
+		win := true
+		for j := 1; j < size; j++ {
+			if gs.board[i*size] == 0 || gs.board[i*size] != gs.board[i*size+j] {
+				win = false
+				break
+			}
+		}
+		if win {
+			return gs.board[i*size]
+		}
 	}
 
-	for _, pos := range winningPositions {
-		if gs.board[pos[0]] != 0 && gs.board[pos[0]] == gs.board[pos[1]] && gs.board[pos[1]] == gs.board[pos[2]] {
-			return gs.board[pos[0]]
+	// Check columns
+	for i := 0; i < size; i++ {
+		win := true
+		for j := 1; j < size; j++ {
+			if gs.board[i] == 0 || gs.board[i] != gs.board[i+j*size] {
+				win = false
+				break
+			}
 		}
+		if win {
+			return gs.board[i]
+		}
+	}
+
+	// Check diagonals
+	win := true
+	// Check main diagonal (top-left to bottom-right)
+	for i := 1; i < size; i++ {
+		if gs.board[0] == 0 || gs.board[0] != gs.board[i*size+i] {
+			win = false
+			break
+		}
+	}
+	if win {
+		return gs.board[0]
+	}
+
+	win = true
+	// Check secondary diagonal (top-right to bottom-left)
+	for i := 1; i < size; i++ {
+		if gs.board[size-1] == 0 || gs.board[size-1] != gs.board[i*size+(size-i-1)] {
+			win = false
+			break
+		}
+	}
+	if win {
+		return gs.board[size-1]
 	}
 
 	isDraw := true
@@ -212,12 +304,94 @@ func (gs *GameState) checkWinner() int {
 func (gs *GameState) score(winner int, depth int) float64 {
 	switch winner {
 	case gs.player:
-		return 10 - float64(depth)
+		return 100 - float64(depth)
 	case GetOponent(gs.player):
-		return float64(depth) - 10
+		return float64(depth) - 100
 	case Draw:
 		return 0
 	default:
 		return 0
 	}
+}
+
+func (gs *GameState) heuristic() float64 {
+	aiPotentialWins := gs.countPotentialWins(gs.player)
+	opponentPotentialWins := gs.countPotentialWins(GetOponent(gs.player))
+
+	return float64(aiPotentialWins - opponentPotentialWins)
+}
+
+func (gs *GameState) countPotentialWins(player int) int {
+	count := 0
+	size := gs.boardSize
+
+	// Check rows
+	for i := 0; i < size; i++ {
+		potentialWin := true
+		emptyCount := 0
+		for j := 0; j < size; j++ {
+			if gs.board[i*size+j] == GetOponent(player) {
+				potentialWin = false
+				break
+			}
+			if gs.board[i*size+j] == 0 {
+				emptyCount++
+			}
+		}
+		if potentialWin && emptyCount == 1 {
+			count++
+		}
+	}
+
+	// Check columns
+	for i := 0; i < size; i++ {
+		potentialWin := true
+		emptyCount := 0
+		for j := 0; j < size; j++ {
+			if gs.board[i+j*size] == GetOponent(player) {
+				potentialWin = false
+				break
+			}
+			if gs.board[i+j*size] == 0 {
+				emptyCount++
+			}
+		}
+		if potentialWin && emptyCount == 1 {
+			count++
+		}
+	}
+
+	// Check main diagonal
+	potentialWin := true
+	emptyCount := 0
+	for i := 0; i < size; i++ {
+		if gs.board[i*size+i] == GetOponent(player) {
+			potentialWin = false
+			break
+		}
+		if gs.board[i*size+i] == 0 {
+			emptyCount++
+		}
+	}
+	if potentialWin && emptyCount == 1 {
+		count++
+	}
+
+	// Check secondary diagonal
+	potentialWin = true
+	emptyCount = 0
+	for i := 0; i < size; i++ {
+		if gs.board[i*size+(size-i-1)] == GetOponent(player) {
+			potentialWin = false
+			break
+		}
+		if gs.board[i*size+(size-i-1)] == 0 {
+			emptyCount++
+		}
+	}
+	if potentialWin && emptyCount == 1 {
+		count++
+	}
+
+	return count
 }

@@ -1,14 +1,16 @@
 package model
 
 type MoveRequest struct {
-	Board      [9]int `json:"board,omitempty"`
-	Difficulty int    `json:"difficulty,omitempty"`
+	Board      []int `json:"board,omitempty"`
+	BoardSize  int   `json:"boardSize,omitempty"`
+	Difficulty int   `json:"difficulty,omitempty"`
 }
 
 type MoveResponse struct {
 	Success      bool   `json:"success"`
 	Message      string `json:"message"`
-	Board        [9]int `json:"board"`
+	Board        []int  `json:"board"`
+	BoardSize    int    `json:"boardSize"`
 	BoardDisplay string `json:"boardDisplay"`
 	GameStatus   string `json:"gameStatus"`
 	NextPlayer   int    `json:"nextPlayer"`
