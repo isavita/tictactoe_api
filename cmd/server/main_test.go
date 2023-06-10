@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/isavita/tictactoe_api/internal/api"
@@ -26,8 +27,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestTicTacToeHandler(t *testing.T) {
-	t.Parallel()
-
 	t.Run("first move with empty payload", func(t *testing.T) {
 		// setup the tic-tac-toe api
 		ticTacToeGame := game.NewTicTacToeGame()
@@ -65,6 +64,25 @@ func TestTicTacToeHandler(t *testing.T) {
 			t.Errorf("got %v want %v", got, want)
 		}
 	})
+
+	t.Run("handles concurrent requests", func(t *testing.T) {
+		s := newTestServer()
+		url := s.URL + "/v1/tictactoe"
+		wg := &sync.WaitGroup{}
+
+		for i := 0; i < 10; i++ {
+			wg.Add(1)
+			go func(w *sync.WaitGroup) {
+				defer w.Done()
+				payload := strings.NewReader(`{}`)
+				req, _ := http.NewRequest(http.MethodPost, url, payload)
+				_, err := http.DefaultClient.Do(req)
+				assertNoError(t, err)
+			}(wg)
+		}
+		wg.Wait()
+	})
+
 }
 
 func TestOpenAIPluginHandler(t *testing.T) {
@@ -106,15 +124,51 @@ func TestLogoHandler(t *testing.T) {
 }
 
 func BenchmarkTicTacToeHandler(b *testing.B) {
-	ticTacToeGame := game.NewTicTacToeGame()
-	ticTacToeAPI := api.NewTicTacToeAPI(ticTacToeGame)
-	s := httptest.NewServer(http.HandlerFunc(ticTacToeAPI.TicTacToeHandler))
+	s := newTestServer()
 	defer s.Close()
-	url := s.URL + "/openapi.yaml"
 
+	url := s.URL + "/v1/tictactoe"
+	for i := 0; i < b.N; i++ {
+		payload := strings.NewReader(`{}`)
+		req, _ := http.NewRequest(http.MethodPost, url, payload)
+		_, err := http.DefaultClient.Do(req)
+		assertNoError(b, err)
+	}
+}
+
+func BenchmarkOpenAIPluginHandler(b *testing.B) {
+	s := newTestServer()
+	defer s.Close()
+
+	url := s.URL + "/.well-known/ai-plugin.json"
 	for i := 0; i < b.N; i++ {
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
-		http.DefaultClient.Do(req)
+		_, err := http.DefaultClient.Do(req)
+		assertNoError(b, err)
+	}
+}
+
+func BenchmarkOpenapiHandler(b *testing.B) {
+	s := newTestServer()
+	defer s.Close()
+
+	url := s.URL + "/openapi.yaml"
+	for i := 0; i < b.N; i++ {
+		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		_, err := http.DefaultClient.Do(req)
+		assertNoError(b, err)
+	}
+}
+
+func BenchmarkLogoHandler(b *testing.B) {
+	s := newTestServer()
+	defer s.Close()
+
+	url := s.URL + "/logo.png"
+	for i := 0; i < b.N; i++ {
+		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		_, err := http.DefaultClient.Do(req)
+		assertNoError(b, err)
 	}
 }
 
@@ -129,4 +183,10 @@ func assertNoError(t testing.TB, err error) {
 	if err != nil {
 		t.Errorf("got error %v when no error was expected", err)
 	}
+}
+
+func newTestServer() *httptest.Server {
+	ticTacToeGame := game.NewTicTacToeGame()
+	ticTacToeAPI := api.NewTicTacToeAPI(ticTacToeGame)
+	return httptest.NewServer(http.HandlerFunc(ticTacToeAPI.TicTacToeHandler))
 }
