@@ -23,7 +23,7 @@ const (
 	MISSING_BOARD      = "Missing board value. Must have exactly 9 (3x3) or 16 (4x4) or 25 (5x5) or 36 (6x6) numbers (0, 1, or 2); 0 (empty), 1 (Player 1), 2 (Player 2)."
 	INVALID_DIFFICULTY = "Invalid difficulty: Use 1 (Easy), 2 (Medium), or 3 (Hard). Default is 3 (Hard) if not provided."
 	INVALID_BOARD_SIZE = "The supported boardSize values are 3, 4, 5 and 6."
-	INVALID_BOARD      = "Invalid board: Must have exactly 9 numbers (0, 1, or 2); 0 (empty), 1 (Player 1), 2 (Player 2); Player 1 moves >= Player 2 moves; max difference: 1."
+	INVALID_BOARD      = "Invalid board: Must have exactly 9, 16, 25, or 36 numbers (0, 1, or 2); 0 (empty), 1 (Player 1), 2 (Player 2); Player 1 moves >= Player 2 moves; max difference: 1."
 )
 
 func (api *TicTacToeAPI) TicTacToeHandler(w http.ResponseWriter, r *http.Request) {
