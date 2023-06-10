@@ -41,7 +41,7 @@ func main() {
 }
 
 func openAIPluginHandler(w http.ResponseWriter, r *http.Request) {
-	jsonFile, err := os.Open("./.well-known/ai-plugin.json") // replace with the path to your ai-plugin.json file
+	jsonFile, err := os.Open("./.well-known/ai-plugin.json")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -38,13 +38,17 @@ func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveReques
 	if aiMove != -1 {
 		success = g.gameState.Play(aiMove)
 		if success {
-			message = "Player " + strconv.Itoa(currentPlayer) + " placed "
+			message = "Player " + strconv.Itoa(currentPlayer) + " has placed "
 			if currentPlayer == XPlayer {
-				message += "X"
+				message += "'X'"
 			} else {
-				message += "O"
+				message += "'O'"
 			}
 			message += " in position " + strconv.Itoa(aiMove+1) + "."
+
+			if isFirstMove(g.gameState.board) {
+				message += " Please note: If the user is playing with 'X', disregard this move. Instead, ask the user where they would like to place their first move, then present the game board reflecting their choice."
+			}
 		} else {
 			message = "Invalid move."
 		}
@@ -76,6 +80,19 @@ func (g *TicTacToeGame) MakeMove(currentPlayer int, moveRequest model.MoveReques
 		GameStatus:   gameStatus,
 		NextPlayer:   nextPlayer,
 	}
+}
+
+func isFirstMove(board []int) bool {
+	count := 0
+	for _, val := range board {
+		if val != 0 {
+			count++
+			if count > 1 {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func boardToDisplay(board []int) string {
