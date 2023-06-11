@@ -12,7 +12,7 @@ import (
 
 func main() {
 	ticTacToeGame := game.NewTicTacToeGame()
-	ticTacToeAPI := api.NewTicTacToeAPI(ticTacToeGame)
+	   ticTacToeAPI := api.NewTicTacToeAPI(ticTacToeGame)
 
 	http.HandleFunc("/v1/tictactoe", ticTacToeAPI.TicTacToeHandler)
 
